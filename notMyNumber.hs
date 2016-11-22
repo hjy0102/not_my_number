@@ -1,15 +1,15 @@
 -- CPSC 312 - 2016
 -- Programming Project 2
 
-module Play where
+module NotMyNumber where
 
 -- to run: 
 -- ghci
--- :load Play
+-- :load NotMyNumber
 
 import System.IO 
 import Player
 import Game
 
-type Leaderboard = (Player, Player)			-- Player1 score, Player2 score
+type Leaderboard = 	(PlayerScore, PlayerScore)		-- Player1 score, Player2 score
 
