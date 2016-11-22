@@ -5,3 +5,6 @@ module Game where
 -- to run: 
 -- ghci
 -- :load Game
+
+import Player
+
