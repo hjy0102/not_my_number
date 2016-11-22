@@ -3,9 +3,13 @@
 
 module Play where
 
--- to run: ghci
+-- to run: 
+-- ghci
 -- :load Play
 
 import System.IO 
+import Player
+import Game
 
--- some stuff to do
+type Leaderboard = (Player, Player)			-- Player1 score, Player2 score
+
