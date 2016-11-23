@@ -2,6 +2,10 @@
 
 module Game where
 
+import System.Random
+import Control.Monad 
+-- (replicateM)
+
 -- to run: 
 -- ghci
 -- :load Game
@@ -11,15 +15,18 @@ type PlayerScore = (Char, Int, Int, Int)      -- name, win, loss, tie
 -- A Player takes in a GameState and a Result and produces a A_Move
 type Player = GameState -> Result -> A_Move
 -- Bomb is where the 'mine' is located 
-type Bomb = Int
+type Bomb = IO Int
+
 -- A_Move is a choice on the board, represented by an Int
 type A_Move = Int                       -- a move for a player to make
+
 -- Decision is win, loss, tie
 -- win 1
 -- tie 0
 -- lost -1
 type Decision = Int
 -- State is a tuple containing the lower and upper bounds of available moves
+
 type State = (A_Move, A_Move)           -- (lower bound, upper bound)
 
 data Action = Move A_Move State PlayerScore PlayerScore       -- do A_Move in State
@@ -33,4 +40,10 @@ data Result = EndOfGame Int PlayerScore PlayerScore             -- end of game
 type GameState = Action -> Result
 
 ----------------- Not My Number Game ------------------
+
+new_Bomb :: Bomb
+new_Bomb = randomRIO (0,100::Int)
+
+
+
 

@@ -8,6 +8,3 @@ module Player where
 -- :load Player
 import Game
 
--- A Player takes in a GameState and a Result and produces a A_Move
-type Player = GameState -> Result -> A_Move
-
