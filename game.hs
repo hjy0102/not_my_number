@@ -16,9 +16,14 @@ type PlayerScore = (Char, Int, Int, Int)      -- name, win, loss, tie
 type Player = GameState -> Result -> A_Move
 -- Bomb is where the 'mine' is located 
 type Bomb = IO Int
-
 -- A_Move is a choice on the board, represented by an Int
 type A_Move = Int                       -- a move for a player to make
+
+{- GameState is 
+	([Lower Bound Array], [Upper Bound Array], 
+	 [player1 moves],     [player2 moves])
+-}
+type GameState = ([A_Move], [A_Move], [A_Move], [A_Move])
 
 -- Decision is win, loss, tie
 -- win 1
@@ -29,15 +34,18 @@ type Decision = Int
 
 type State = (A_Move, A_Move)           -- (lower bound, upper bound)
 
-data Action = Move A_Move State PlayerScore PlayerScore       -- do A_Move in State
-            | Start                     -- returns Starting
+data Action = Move A_Move GameState       -- do A_Move in State
+            | Start                       -- returns Starting
 -- Result 
+{-
+TODO something to deal with after a move is made
+-}
 -- EndOfGame takes the Decision, Player1 Score, Player2 Score
 data Result = EndOfGame Int PlayerScore PlayerScore             -- end of game 
-            | ContinueGame State [A_Move]      -- continue game and available spaces
+            | ContinueGame GameState [A_Move]      -- continue game and available spaces
             deriving (Eq, Show)
 
-type GameState = Action -> Result
+type Game = Action -> Result
 
 ----------------- Not My Number Game ------------------
 
