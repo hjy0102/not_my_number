@@ -17,3 +17,7 @@ The interval always contains the value b and the chances of Player1 or Player2 c
 * GUI for the game -- makes the game easier to play
 * rewards or point system for 'successful' choices
 * tournament system: keeps track of how many wins and losses for each player
+
+# To run
+In terminal:
+cabal install random
