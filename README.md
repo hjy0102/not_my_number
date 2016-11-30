@@ -19,5 +19,8 @@ The interval always contains the value b and the chances of Player1 or Player2 c
 * tournament system: keeps track of how many wins and losses for each player
 
 # To run
+Make sure ghci is downloaded and also install random package by, 
+
 In terminal:
+
 cabal install random
