@@ -79,11 +79,11 @@ playNewGame n = do
 -- guess and one as a counter for the attempts
 guessFor :: Int -> Int -> IO ()
 guessFor bomb count = do
-	putStr "Choose a number? "
-	guess <- getNumber "\nCurrent guess? "
-	if bomb == guess
-		then foundBomb $ count + 1
-		else missedBomb bomb count guess 
+  putStr "Choose a number? "
+  guess <- getNumber "\nCurrent guess? "
+  if bomb == guess
+    then foundBomb $ count + 1
+    else missedBomb bomb count guess 
 
 -- keeps asking for a number 
 getNumber :: String -> IO Int 
@@ -94,8 +94,8 @@ getNumber promptAgain =
 -- not good :( 
 foundBomb :: Int -> IO ()
 foundBomb count = do
-	putStrLn "BOOM!*(#@! You found the bomb."
-	putStrLn $ "You died in " ++ show count ++ " turns."
+  putStrLn "BOOM!*(#@! You found the bomb."
+  putStrLn $ "You died in " ++ show count ++ " turns."
 
 -- missedBomb lets the players keep guessing
 {-- TODO: handle changing the array of possible moves
@@ -103,10 +103,10 @@ foundBomb count = do
 The too low or too high is temporary for testing only
 --}
 missedBomb bomb attempts guess = do
-	if bomb > guess
-	    then putStrLn "Too Low"
+  if bomb > guess
+      then putStrLn "Too Low"
         else putStrLn "Too high"
-	guessFor bomb $ attempts + 1
+  guessFor bomb $ attempts + 1
 
 ---------------------------------------------------------------------------
 ----------------------- interaction with player ---------------------------
@@ -121,19 +121,19 @@ getYesNo promptAgain =
 
 getFromStdin :: String -> (IO a) -> (a -> Bool) -> (a -> b) -> IO b
 getFromStdin promptAgain inputFunction checkOK transform_OK = do
-	input <- inputFunction
-	if checkOK input 
-		then return $ transform_OK input 
-		else do 
-			putStr promptAgain
-			getFromStdin promptAgain inputFunction checkOK transform_OK
+  input <- inputFunction
+  if checkOK input 
+    then return $ transform_OK input 
+    else do 
+      putStr promptAgain
+      getFromStdin promptAgain inputFunction checkOK transform_OK
 
 
 playAgain :: IO Bool
 playAgain = do
-	putStr "One more round? Let's play again...? "
-	again <- getYesNo "\nPlay again?  Y or N:  "
-	return $ again == 'Y'
+  putStr "One more round? Let's play again...? "
+  again <- getYesNo "\nPlay again?  Y or N:  "
+  return $ again == 'Y'
 
 quitPlaying :: IO ()
 quitPlaying = do 
