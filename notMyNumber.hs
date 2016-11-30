@@ -80,7 +80,7 @@ playNewGame n = do
 guessFor :: Int -> Int -> IO ()
 guessFor bomb count = do
 	putStr "Choose a number? "
-	guess <- getNum "\n Curentt guess?"
+	guess <- getNum "\n Current guess?"
 	if bomb == guess
 		then foundBomb $ attempts + 1
 		else missedBomb bomb attempts guess 
