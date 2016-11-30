@@ -19,8 +19,8 @@ import System.Random
 -- type Leaderboard = 	(PlayerScore, PlayerScore)		-- Player1 score, Player2 score
 maxNum = 100 
 
-notMyNumber :: IO ()
-notMyNumber = do
+start :: IO ()
+start = do
     args <- getArgs
     checkArgs args
     seed <- getSeed args
@@ -100,9 +100,9 @@ foundBomb count = do
 The too low or too high is temporary for testing only
 --}
 missedBomb bomb attempts guess = do
-	if target > guess
-     then putStrLn "Too Low"
-     else putStrLn "Too high"
+	if bomb > guess
+	    then putStrLn "Too Low"
+        else putStrLn "Too high"
 	guessFor bomb $ attempts + 1
 
 ---------------------------------------------------------------------------

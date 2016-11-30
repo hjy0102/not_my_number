@@ -24,3 +24,9 @@ Make sure ghci is downloaded and also install random package by,
 In terminal:
 
 cabal install random
+
+### To play the game: 
+
+ghci
+:l NotMyNumber
+start
