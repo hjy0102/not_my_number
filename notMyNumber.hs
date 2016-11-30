@@ -99,10 +99,29 @@ foundBomb count = do
 missedBomb bomb attempts guess = do
 	guessFor bomb $ attempts + 1
 
+---------------------------------------------------------------------------
+----------------------- interaction with player ---------------------------
+---------------------------------------------------------------------------
 
+-- yes and no responses are case sensitive!!!
+-- keeps prompting until a valid Y or N is returned from player
+getYesNo :: String -> IO Char
+getYesNn promptAgain = 
+  getFromStdin promptAgain getChar (`elem` "yYnN") toUpper
 
+-- keeps asking for a number 
+getNumber :: String -> IO Int 
+getNumber promptAgain = 
+	getFromStdin promptAgain getLine is_Number read 
 
-
+getFromStdin :: String -> (IO a) -> (a -> Bool) -> (a -> b) -> IO b
+getFromStdin promptAgain inputFunction checkOK transform_OK = do
+	input <- inputFunction
+	if checkOK input 
+		then return $ transform_OK input 
+		else do 
+			putStr promptAgain
+			getFromStdin promptAgain inputFunction checkOK transform_OK
 
 
 
