@@ -63,9 +63,9 @@ getRandomSeed = do
 -- this is how to start the new Game 
 playNewGame :: StdGen -> IO ()
 playNewGame n = do
-    putStrLn $ "\n Welcome to NotMyNumber!"
-    putStrLn $ "\n The objective of the game is not to be the player to find the bomb"
-    putStrLn $ "\n The bomb is hidden in the field. Guess a number between 0 and" ++ (show (maxNum - 1)) ++ " to begin"
+    putStrLn $ "\nWelcome to NotMyNumber!"
+    putStrLn $ "The objective of the game is not to be the player to find the bomb"
+    putStrLn $ "The bomb is hidden in the field. Guess a number between 0 and " ++ (show (maxNum - 1)) ++ " to begin"
     let (inTargetNumber, newGen) = next n 
     let bomb = mod inTargetNumber maxNum
     guessFor bomb 0 
@@ -133,12 +133,12 @@ getFromStdin promptAgain inputFunction checkOK transform_OK = do
 playAgain :: IO Bool
 playAgain = do
 	putStr "One more round? Let's play again...?"
-	again <- getYesNo "\n Play again?  Y or N"
+	again <- getYesNo "\nPlay again?  Y or N"
 	return $ again == 'Y'
 
 quitPlaying :: IO ()
 quitPlaying = do 
-  putStrLn "\n Nahhhh... bye."
+  putStrLn "\nNahhhh... bye."
   exitWith ExitSuccess
 
 -- Argument verification (FOR TESTING really... )
@@ -176,7 +176,7 @@ showSeed :: Int -> IO ()
 showSeed seed = putStrLn $ "The random seed is " ++ show seed
 -- FOR TESTING ONLY
 showBomb :: Int -> IO ()
-showBomb answer = putStrLn $ "The answer was " ++ show answer
+showBomb answer = putStrLn $ "The bomb was at " ++ show answer
  
 
 
