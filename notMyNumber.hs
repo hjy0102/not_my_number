@@ -21,11 +21,11 @@ maxNum = 100
 
 notMyNumber :: IO ()
 notMyNumber = do
-	args <- getArgs
-	checkArgs args
-	seed <- getSeed args
-	playNewGame $ getRandomGen seed
-	putStrLn "Game Over"
+    args <- getArgs
+    checkArgs args
+    seed <- getSeed args
+    playNewGame $ getRandomGen seed
+    putStrLn "Game Over"
 
 -- create a random generator with the seed given from args seed 
 getRandomGen :: Int -> StdGen
@@ -81,10 +81,10 @@ playNewGame n = do
 guessFor :: Int -> Int -> IO ()
 guessFor bomb count = do
 	putStr "Choose a number? "
-	guess <- getNum "\n Current guess?"
+	guess <- getNumber "\n Current guess?"
 	if bomb == guess
-		then foundBomb $ attempts + 1
-		else missedBomb bomb attempts guess 
+		then foundBomb $ count + 1
+		else missedBomb bomb count guess 
 
 
 -- foundBomb is what happens when you find the bomb
@@ -113,7 +113,7 @@ getYesNo promptAgain =
 -- keeps asking for a number 
 getNumber :: String -> IO Int 
 getNumber promptAgain = 
-	getFromStdin promptAgain getLine isNumber read 
+	getFromStdin promptAgain getLine isNum read 
 
 getFromStdin :: String -> (IO a) -> (a -> Bool) -> (a -> b) -> IO b
 getFromStdin promptAgain inputFunction checkOK transform_OK = do
@@ -170,8 +170,8 @@ isNum (x:xs) = all isDigit xs && (x == '-' || isDigit x)
 showSeed :: Int -> IO ()
 showSeed seed = putStrLn $ "The random seed is " ++ show seed
 -- FOR TESTING ONLY
-showAnswer :: Int -> IO ()
-showAnswer answer = putStrLn $ "The answer was " ++ show answer
+showBomb :: Int -> IO ()
+showBomb answer = putStrLn $ "The answer was " ++ show answer
  
 
 
