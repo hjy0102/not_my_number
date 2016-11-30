@@ -57,23 +57,23 @@ getSeed (s:_) = return $ read s
 -- an int from it to make a new bomb (WARNING: not the best solution)
 getRandomSeed :: IO Int
 getRandomSeed = do
-	my_RandomS <- getStdGen      
-	return $ fst $ System.Random.random $ my_RandomS
+    my_RandomS <- getStdGen      
+    return $ fst $ System.Random.random $ my_RandomS
 
 -- this is how to start the new Game 
 playNewGame :: StdGen -> IO ()
 playNewGame n = do
-	putStrLn $ "\n Welcome to NotMyNumber!"
-	putStrLn $ "\n The objective of the game is not to be the player to find the bomb"
-	putStrLn $ "\n The bomb is hidden in the field. Guess a number between 0 and" ++ (show (maxNum - 1)) ++ " to begin"
-	let (inTargetNumber, newGen) = next n 
-	let bomb = mod inTargetNumber maxNum
-	guessFor bomb 0 
-	showBomb bomb
-	again <- playAgain
-	if again 
-		then playNewGame newGen
-		else quitPlaying
+    putStrLn $ "\n Welcome to NotMyNumber!"
+    putStrLn $ "\n The objective of the game is not to be the player to find the bomb"
+    putStrLn $ "\n The bomb is hidden in the field. Guess a number between 0 and" ++ (show (maxNum - 1)) ++ " to begin"
+    let (inTargetNumber, newGen) = next n 
+    let bomb = mod inTargetNumber maxNum
+    guessFor bomb 0 
+    showBomb bomb
+    again <- playAgain
+    if again 
+        then playNewGame newGen
+        else quitPlaying
 
 -- guessFor handles all the guessing
 -- takes in two Int arguments: one for the 
@@ -96,8 +96,13 @@ foundBomb count = do
 
 -- missedBomb lets the players keep guessing
 {-- TODO: handle changing the array of possible moves
+
+The too low or too high is temporary for testing only
 --}
 missedBomb bomb attempts guess = do
+	if target > guess
+     then putStrLn "Too Low"
+     else putStrLn "Too high"
 	guessFor bomb $ attempts + 1
 
 ---------------------------------------------------------------------------
