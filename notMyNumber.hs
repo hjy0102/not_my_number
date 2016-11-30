@@ -17,6 +17,7 @@ import System.Exit
 import System.Random
 
 -- type Leaderboard = 	(PlayerScore, PlayerScore)		-- Player1 score, Player2 score
+maxNum = 100 
 
 notMyNumber :: IO ()
 notMyNumber = do
@@ -106,13 +107,13 @@ missedBomb bomb attempts guess = do
 -- yes and no responses are case sensitive!!!
 -- keeps prompting until a valid Y or N is returned from player
 getYesNo :: String -> IO Char
-getYesNn promptAgain = 
+getYesNo promptAgain = 
   getFromStdin promptAgain getChar (`elem` "yYnN") toUpper
 
 -- keeps asking for a number 
 getNumber :: String -> IO Int 
 getNumber promptAgain = 
-	getFromStdin promptAgain getLine is_Number read 
+	getFromStdin promptAgain getLine isNumber read 
 
 getFromStdin :: String -> (IO a) -> (a -> Bool) -> (a -> b) -> IO b
 getFromStdin promptAgain inputFunction checkOK transform_OK = do
@@ -124,6 +125,54 @@ getFromStdin promptAgain inputFunction checkOK transform_OK = do
 			getFromStdin promptAgain inputFunction checkOK transform_OK
 
 
+playAgain :: IO Bool
+playAgain = do
+	putStr "One more round? Let's play again...?"
+	again <- getYesNo "\n Play again?  Y or N"
+	return $ again == 'Y'
+
+quitPlaying :: IO ()
+quitPlaying = do 
+  putStrLn "\n Nahhhh... bye."
+  exitWith ExitSuccess
+
+-- Argument verification (FOR TESTING really... )
+checkArgs :: [String] -> IO ()
+checkArgs args =
+  if verifyArgs args
+     then putStrLn "Okay! Let's play!"
+     else exitWithBadArgs 
+
+
+exitWithBadArgs :: IO ()
+exitWithBadArgs = do 
+  putStrLn "ummm... sorry but there's something wrong here" -- just throw some errors
+  progName <- getProgName
+  putStrLn $ "Use: " ++  progName ++ " [optional random seed]"
+  exitWith $ ExitFailure 1
+
+-- Legitimate arguments are none, or a string representing
+-- a random seed.  Nothing else is accepted.
+verifyArgs :: [String] -> Bool
+verifyArgs [] = True
+verifyArgs (x:xs) = null xs && isNum x
+
+-- Verify that input is a number.  This approach was chosen as read raises an
+-- exception if it can't parse its input.  This approach has the benefit
+-- of being short, yet sufficient to allow the use of read on anything verified
+-- with it, without having to deal with exceptions.
+isNum :: String -> Bool
+isnum [] = False 
+isNum (x:xs) = all isDigit xs && (x == '-' || isDigit x)
+
+---------------------------------------------------------------------------
+-- FOR TESTING ONLY
+showSeed :: Int -> IO ()
+showSeed seed = putStrLn $ "The random seed is " ++ show seed
+-- FOR TESTING ONLY
+showAnswer :: Int -> IO ()
+showAnswer answer = putStrLn $ "The answer was " ++ show answer
+ 
 
 
 
