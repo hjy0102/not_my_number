@@ -30,10 +30,6 @@ getPlayerWin (name, win, loss) = win
 getPlayerLoss :: PlayerScore -> Int
 getPlayerLoss (name, win, loss) = loss 
 
-
-
-
-
 -- Tournament State is Player1 score, Player2 score
 type TournammentState = (PlayerScore, PlayerScore)   -- wins, losses
 
@@ -41,31 +37,6 @@ type TournammentState = (PlayerScore, PlayerScore)   -- wins, losses
 type GameState = ((Int, Int), Int)
 setGameState :: (Int, Int) -> Int -> GameState
 setGameState bound bomb = (bound, bomb)
-
-
---play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
---play game start opponent tournament_state =
---  let (wins, losses) = tournament_state in
---   do
---      putStrLn ("Tournament results: "++ show wins ++ " wins "++show losses++" losses "++show ties++" ties")
---      putStrLn "Who starts? 0=you, 1=computer, 2=exit."
---      line <- getLine
---      if (read line :: Int)==0
---      then
---            person_play game start opponent tournament_state
---      else if (read line :: Int)==1
---           then
---               computer_play game start opponent tournament_state
---            else
---               return tournament_state
-
-
-
-
-
-
-
-
 
 ---------------------------------------------------------------------------
 minNum = 0
@@ -80,6 +51,7 @@ start = do
   name <- getLine
   let player1     = setPlayerScore name 0 0
   let comp_player = setPlayerScore "Computer" 0 0
+  let tournament_state = (player1, comp_player)
   seed <- getSeed args
   playNewGame player1 comp_player range $ getRandomGen seed
   putStrLn "Game Over. "
@@ -115,17 +87,11 @@ playNewGame p1 p2 range n = do
     
     putStrLn $ "Who starts? 0 = " ++ (show (getPlayerName p1)) ++ ", 1 = computer, 2 = exit."
     starter <- getLine
-    ---- player1 starts
-    --if ((read line :: Int) == 0)
-    --    then guessFor p1 p2 bomb 0 0 range
-    ---- computer starts
-    --else if ((read line :: Int) == 1)
-    --    then guessFor p2 p1 bomb 0 0 range
-    ---- quit game
-    --else if ((read line :: Int) == 2) 
-    --    then quitPlaying
-    guessFor p1 p2 bomb 0 0 range
-    showBomb bomb
+    --if ((read starter:: Int) == 0)   then guessFor p1 p2 bomb 0 0 range
+    --if ((read starter:: Int) == 1)   then guessFor p2 p1 bomb 0 0 range
+    --if ((read starter:: Int) == 2)   then quitPlaying
+    setFirstPlayer starter p1 p2 bomb range
+    showBomb bomb 
     putStrLn $ "\nThe Score: " ++ show (getPlayerName p1) ++ " has " ++ show (getPlayerWin p1) ++ " wins and " ++ show (getPlayerLoss p1) ++ " losses."
     putStrLn $ "\nThe Score: " ++ show (getPlayerName p2) ++ " has " ++ show (getPlayerWin p2) ++ " wins and " ++ show (getPlayerLoss p2) ++ " losses."
     again <- playAgain
@@ -133,8 +99,10 @@ playNewGame p1 p2 range n = do
         then playNewGame p1 p2 range newGen
         else quitPlaying
 
-
-
+setFirstPlayer line p1 p2 bomb range
+  | ((read line:: Int) == 0)   = guessFor p1 p2 bomb 0 0 range
+  | ((read line:: Int) == 1)   = guessFor p2 p1 bomb 0 0 range
+  | ((read line:: Int) == 2)   = quitPlaying
 
 
 -- guessFor handles all the guessing
