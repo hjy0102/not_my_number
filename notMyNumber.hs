@@ -25,7 +25,7 @@ start :: IO ()
 start = do
   let range = (minNum, maxNum)
   args <- getArgs
-  checkArgs args
+  checkArgs args range
   seed <- getSeed args
   playNewGame range $ getRandomGen seed
   putStrLn "Game Over"
@@ -70,7 +70,7 @@ playNewGame range n = do
     let lowerB = fst range
     let upperB = snd range
     let bomb = mod inTargetNumber (snd range)
-    guessFor bomb 0 
+    guessFor bomb 0 range
     showBomb bomb
     again <- playAgain
     if again 
@@ -81,18 +81,18 @@ playNewGame range n = do
 -- guessFor handles all the guessing
 -- takes in two Int arguments: one for the 
 -- guess and one as a counter for the attempts
-guessFor :: Int -> Int -> IO ()
-guessFor bomb count = do
+guessFor :: Int -> Int -> (Int, Int) -> IO ()
+guessFor bomb count range = do
   putStr "Choose a number? "
-  guess <- getNumber "\nCurrent guess? "
+  guess <- getNumber "\nCurrent guess? " range
   if bomb == guess
     then foundBomb $ count + 1
-    else missedBomb bomb count guess 
+    else missedBomb bomb count range guess 
 
 -- keeps asking for a number 
-getNumber :: String -> IO Int 
-getNumber promptAgain = 
-  getFromStdin promptAgain getLine isNum read 
+getNumber :: String -> (Int, Int) -> IO Int 
+getNumber promptAgain range = 
+  getFromStdin promptAgain getLine (isNum range) read 
 
 -- foundBomb is what happens when you find the bomb
 -- not good :( 
@@ -106,11 +106,17 @@ foundBomb count = do
 !!!
 The too low or too high is temporary for testing only
 --}
-missedBomb bomb attempts guess = do
+missedBomb bomb attempts (lower, upper) guess = do
   if bomb > guess
-      then putStrLn "Too Low"
-        else putStrLn "Too high"
-  guessFor bomb $ (attempts + 1)
+      then do 
+        putStrLn "too low"
+        guessFor bomb (attempts + 1) (guess, upper)
+        else do 
+          putStrLn "too high"
+          guessFor bomb (attempts + 1) (lower, guess)
+
+
+
 
 ---------------------------------------------------------------------------
 ----------------------- interaction with player ---------------------------
@@ -143,9 +149,9 @@ quitPlaying = do
   exitWith ExitSuccess
 
 -- Argument verification (FOR TESTING, really... )
-checkArgs :: [String] -> IO ()
-checkArgs args =
-  if verifyArgs args
+checkArgs :: [String] -> (Int, Int) -> IO ()
+checkArgs args range =
+  if verifyArgs range args
      then putStrLn "Okay! Let's play!"
      else exitWithBadArgs 
 
@@ -158,22 +164,22 @@ exitWithBadArgs = do
 
 -- Legitimate arguments are none, or a string representing
 -- a random seed.  Nothing else is accepted.
-verifyArgs :: [String] -> Bool
-verifyArgs [] = True
-verifyArgs (x:xs) = null xs && isNum x 
+verifyArgs :: (Int, Int) -> [String] -> Bool
+verifyArgs _ [] = True
+verifyArgs range (x:xs) = null xs && isNum range x 
 
 -- Verify that input is a number.  This approach was chosen as read raises an
 -- exception if it can't parse its input.  This approach has the benefit
 -- of being short, yet sufficient to allow the use of read on anything verified
 -- with it, without having to deal with exceptions.
 -- also, isNum should check if it's within the lowerB and upperB
-isNum :: String -> Bool
-isNum [] = False 
-isNum (x:xs) = all isDigit xs && (x == '-' || isDigit x) && isInBounds (x:xs)
+isNum :: (Int, Int) -> String -> Bool
+isNum _ [] = False 
+isNum range (x:xs) = all isDigit xs && (x == '-' || isDigit x) && isInBounds range (x:xs)
 
 -- isInBounds checks that the input is in bounds of the min and max 
-isInBounds :: String -> Bool
-isInBounds s = ((read s :: Int) >= minNum) && ((read s :: Int) <= maxNum)
+isInBounds :: (Int, Int) -> String -> Bool
+isInBounds range s = ((read s :: Int) > (fst range)) && ((read s :: Int) < (snd range))
 
 
 
