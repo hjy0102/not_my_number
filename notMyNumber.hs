@@ -87,9 +87,6 @@ playNewGame p1 p2 range n = do
     
     putStrLn $ "Who starts? 0 = " ++ (show (getPlayerName p1)) ++ ", 1 = computer, 2 = exit."
     starter <- getLine
-    --if ((read starter:: Int) == 0)   then guessFor p1 p2 bomb 0 0 range
-    --if ((read starter:: Int) == 1)   then guessFor p2 p1 bomb 0 0 range
-    --if ((read starter:: Int) == 2)   then quitPlaying
     setFirstPlayer starter p1 p2 bomb range
     showBomb bomb 
     putStrLn $ "\nThe Score: " ++ show (getPlayerName p1) ++ " has " ++ show (getPlayerWin p1) ++ " wins and " ++ show (getPlayerLoss p1) ++ " losses."
@@ -106,12 +103,11 @@ setFirstPlayer line p1 p2 bomb range
 
 
 -- guessFor handles all the guessing
--- guessFor takes in:
--- player1 player2 
+-- guessFor takes in: player1 player2 
 -- bomb location
 -- attempts of player1, attempts of player2
 -- acceptable range
--- returns IO ()
+
 guessFor :: PlayerScore -> PlayerScore -> Int -> Int -> Int -> (Int, Int) -> IO ()
 guessFor p1 p2 bomb count_p1 count_p2 range = do
   whoseTurn p1
@@ -237,32 +233,6 @@ showBomb answer = putStrLn $ "The bomb was at " ++ show answer
 
 showRange :: (Int, Int) -> IO ()
 showRange range = putStrLn $ "Choose a value between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range)-1))
----------------------------------------------------------------------------
-
-
-
----------------------------------------------------------------------------
--- Tests
-
-{--
-
-isInBounds "1"
->> True
-isInBounds "100"
->> True
-isInBounds "101"
->> False
-isInBounds "-1"
->> False
-
-isNum "-1"
->> True
-
--- should start a game
-playNewGame (1,10) (getRandomGen 20)
-
-
---}
 
 
 
