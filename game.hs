@@ -10,7 +10,8 @@ import qualified Data.Set as Set
 -- to run: 
 -- ghci
 -- :load Game
-
+ 
+type PlayerRecord = (Int, Int) -- win, loss
 type PlayerScore = (Char, Int, Int)      -- name, win, loss
 -- A Player takes in a GameState and a Result and produces a A_Move
 type Player = GameState -> Result -> A_Move
@@ -33,7 +34,7 @@ data Decision = Win | Lose
             deriving (Eq, Show)
 
 data Action = Move A_Move GameState       -- do A_Move in GameState
-            | Start                       -- returns Starting
+            | Start GameState                      -- returns Starting
 -- Result 
 {-
 TODO something to deal with after a move is made
@@ -67,6 +68,8 @@ then
 notMyNumber (Move aMove ((lowerB, upperB), bomb))
  | aMove == bomb                         = EndOfGame Lose 
  | validMove aMove lowerB upperB         = adjustBounds aMove (lowerB, upperB) bomb
+
+notMyNumber Start ((lowerB, upperB),bomb) = ContinueGame ((lowerB, upperB),bomb)
 
 validMove aMove lowerB upperB = (aMove > lowerB) && (aMove < upperB)
 

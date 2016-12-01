@@ -26,19 +26,8 @@ start = do
   let range = (minNum, maxNum)
   putStrLn "Which mode? 0=2-players, 1=easy, 2=medium, 3=hard."
   args <- getArgs
-  putStrLn (show args) -- Just for test
-  seed <- getSeed []
-  mode <- checkArgs args
-  if(mode == "0")
-    then 
-  else if (mode == "1")
-    then
-  else if (mode == "2")
-    then
-  else if (mode == "3")
-    then
-  else exitWithBadArgs
-  
+  checkArgs args range
+  seed <- getSeed args
   playNewGame range $ getRandomGen seed
   putStrLn "Game Over"
 
@@ -82,7 +71,7 @@ playNewGame range n = do
     let lowerB = fst range
     let upperB = snd range
     let bomb = mod inTargetNumber (snd range)
-    guessFor bomb 0 
+    guessFor bomb 0 range
     showBomb bomb
     again <- playAgain
     if again 
@@ -93,18 +82,19 @@ playNewGame range n = do
 -- guessFor handles all the guessing
 -- takes in two Int arguments: one for the 
 -- guess and one as a counter for the attempts
-guessFor :: Int -> Int -> IO ()
-guessFor bomb count = do
-  putStr "Choose a number? "
-  guess <- getNumber "\nCurrent guess? "
+guessFor :: Int -> Int -> (Int, Int) -> IO ()
+guessFor bomb count range = do
+  -- putStr "Choose a number? "
+  showRange range
+  guess <- getNumber "\nCurrent guess? " range
   if bomb == guess
     then foundBomb $ count + 1
-    else missedBomb bomb count guess 
+    else missedBomb bomb count range guess 
 
 -- keeps asking for a number 
-getNumber :: String -> IO Int 
-getNumber promptAgain = 
-  getFromStdin promptAgain getLine isNum read 
+getNumber :: String -> (Int, Int) -> IO Int 
+getNumber promptAgain range = 
+  getFromStdin promptAgain getLine (isNum range) read 
 
 -- foundBomb is what happens when you find the bomb
 -- not good :( 
@@ -118,11 +108,17 @@ foundBomb count = do
 !!!
 The too low or too high is temporary for testing only
 --}
-missedBomb bomb attempts guess = do
+missedBomb bomb attempts (lower, upper) guess = do
   if bomb > guess
-      then putStrLn "Too Low"
-        else putStrLn "Too high"
-  guessFor bomb $ (attempts + 1)
+      then do 
+        putStrLn "too low"
+        guessFor bomb (attempts + 1) (guess, upper)
+        else do 
+          putStrLn "too high"
+          guessFor bomb (attempts + 1) (lower, guess)
+
+
+
 
 ---------------------------------------------------------------------------
 ----------------------- interaction with player ---------------------------
@@ -155,9 +151,9 @@ quitPlaying = do
   exitWith ExitSuccess
 
 -- Argument verification (FOR TESTING, really... )
-checkArgs :: [String] -> IO ()
-checkArgs args =
-  if verifyArgs args
+checkArgs :: [String] -> (Int, Int) -> IO ()
+checkArgs args range =
+  if verifyArgs range args
      then putStrLn "Okay! Let's play!"
      else exitWithBadArgs 
 
@@ -170,22 +166,22 @@ exitWithBadArgs = do
 
 -- Legitimate arguments are none, or a string representing
 -- a random seed.  Nothing else is accepted.
-verifyArgs :: [String] -> Bool
-verifyArgs [] = True
-verifyArgs (x:xs) = null xs && isNum x 
+verifyArgs :: (Int, Int) -> [String] -> Bool
+verifyArgs _ [] = True
+verifyArgs range (x:xs) = null xs && isNum range x 
 
 -- Verify that input is a number.  This approach was chosen as read raises an
 -- exception if it can't parse its input.  This approach has the benefit
 -- of being short, yet sufficient to allow the use of read on anything verified
 -- with it, without having to deal with exceptions.
 -- also, isNum should check if it's within the lowerB and upperB
-isNum :: String -> Bool
-isNum [] = False 
-isNum (x:xs) = all isDigit xs && (x == '-' || isDigit x) && isInBounds (x:xs)
+isNum :: (Int, Int) -> String -> Bool
+isNum _ [] = False 
+isNum range (x:xs) = all isDigit xs && (x == '-' || isDigit x) && isInBounds range (x:xs)
 
 -- isInBounds checks that the input is in bounds of the min and max 
-isInBounds :: String -> Bool
-isInBounds s = ((read s :: Int) >= minNum) && ((read s :: Int) <= maxNum)
+isInBounds :: (Int, Int) -> String -> Bool
+isInBounds range s = ((read s :: Int) > (fst range)) && ((read s :: Int) < (snd range))
 
 
 
@@ -206,7 +202,10 @@ showSeed seed = putStrLn $ "The random seed is " ++ show seed
 -- FOR TESTING ONLY
 showBomb :: Int -> IO ()
 showBomb answer = putStrLn $ "The bomb was at " ++ show answer
- 
+
+
+showRange :: (Int, Int) -> IO ()
+showRange range = putStrLn $ "Choose a value between " ++ (show (fst range)) ++ " and " ++ (show (snd range))
 ---------------------------------------------------------------------------
 
 
@@ -242,39 +241,80 @@ playNewGame (1,10) (getRandomGen 20)
 ------------------ New Code for NotMyNumber --------------------------------
 
 
-person_play :: Game -> Result -> Player
+
+
+
+start1 :: IO ()
+start1 = do
+  let range = (minNum, maxNum)
+  putStrLn $ "\nWelcome to NotMyNumber!"
+  putStrLn $ "The objective of the game is not to be the player to find the bomb"
+  putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show (fst range)) ++ " and " ++ (show (snd range)) ++ " to begin"
+  playNewGame1 notMyNumber (notMyNumber Start) (0,0)
+  else exitWithBadArgs
+  putStrLn "Game Over"
+
+playNewGame1 :: Game -> PlayerRecord -> Bool -> IO PlayerRecord
+playNewGame1 game record isQuit= 
+  let (inTargetNumber, newGen) = next (getRandomGen seed)
+      bomb = mod inTargetNumber (snd range)
+  in
+    do
+      putStrLn "Which mode? 0=2-players, 1=easy, 2=medium, 3=hard."
+      mode <- getLine
+      putStrLn "Who starts? 0=you, 1=computer"
+      order <- getLine
+      putStrLn ("mode is"++show mode) -- Just for test
+      putStrLn ("order is"++show order)  -- Just for test
+      seed <- getSeed []
+      {- TODO make more if else -}
+      if((read mode :: Int)==0)
+        then putStrLn "Have not implemented this"
+      else if ((read mode :: Int)==1)
+        then person_play game (notMyNumber Start ((range),bomb)) easy_player record
+      else if ((read mode :: Int)==2)
+        then playNewGame1 game (notMyNumber Start ((range),bomb)) medium_player record
+      else if ((read mode :: Int)==3)
+        then playNewGame1 game (notMyNumber Start ((range),bomb)) hard_player record
+      else 
+
+person_play :: Game -> Result -> Player -> PlayerRecord -> IO PlayerRecord
 -- opponent has played, the person must now play
-person_play game (EndOfGame Lose) opponent =
+person_play game (EndOfGame Lose) opponent (wins,losses) =
    do
       putStrLn "Computer won!"
-      play game (game Start) opponent (wins,losses+1,ties)
-person_play game (ContinueGame state avail) opponent tournament_state =
+      again <- playAgain
+      if again 
+      -- this is wrong !!! just placing for the program to compile
+        then playNewGame1 game (wins,losses+1)
+        else quitPlaying
+      
+person_play game (ContinueGame (bound, bomb)) opponent record =
    do
-      putStrLn ("State is "++show state++" choose one of "++show avail)
-      line <- getLine
-      computer_play game (game (Move (read line :: AMove) state)) opponent tournament_state
+      {- TODO get User input as AMove -}
+      -- move <-
+      computer_play game (game (Move move (bound, bomb)) opponent record
 
 
-computer_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
+computer_play :: Game -> Result -> Player -> PlayerRecord -> IO PlayerRecord
 -- computer_play game current_result opponent tournament_state
 -- person has played, the computer must now play
-computer_play game (EndOfGame Lose) opponent (wins,losses,ties) =
+computer_play game (EndOfGame Lose) opponent (wins,losses) =
    do
       putStrLn "You won!"
-      play game (game Start) opponent (wins+1,losses,ties)
+      again <- playAgain
+      if again 
+      -- this is wrong !!! just placing for the program to compile
+        then playNewGame1 game (wins,losses+1)
+        else quitPlaying
       
-computer_play game result opponent tournament_state =
-      let ContinueGame state _ = result
+computer_play game result opponent (wins,losses) =
+      let ContinueGame state = result
           opponent_move = opponent game result
         in
           do
             putStrLn ("The computer chose "++show opponent_move)
-            person_play game (game (Move opponent_move state)) opponent tournament_state
-
-
-
-
-
+            person_play game (game (Move opponent_move state) (bound, bomb)) opponent (wins,losses)
 
 
 
