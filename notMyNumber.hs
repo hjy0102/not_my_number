@@ -44,10 +44,12 @@ start = do
   let range = (minNum, maxNum)
   args <- getArgs
   checkArgs args range
-  putStrLn "Player name ?  "
+  putStrLn "Player1's name ?  "
   name <- getLine
   let player1     = setPlayerScore name 0 0
-  let comp_player = setPlayerScore "Computer" 0 0
+  putStrLn "Player2's name ?  "
+  name2 <- getLine
+  let comp_player = setPlayerScore name2 0 0
   let tournament_state = (player1, comp_player)
   seed <- getSeed args
   playNewGame player1 comp_player range $ getRandomGen seed
@@ -82,7 +84,7 @@ playNewGame p1 p2 range n = do
     let bomb = mod inTargetNumber ((snd range)+1)
     let gameState = setGameState range bomb
     
-    putStrLn $ "Who starts? 0 = " ++ (show (getPlayerName p1)) ++ ", 1 = computer, 2 = exit."
+    putStrLn $ "Who starts? 0 = " ++ (show (getPlayerName p1)) ++ ", 1 = " ++ (show (getPlayerName p2)) ++ ", 2 = exit."
     starter <- getLine
     setFirstPlayer starter p1 p2 bomb range
     showBomb bomb 
