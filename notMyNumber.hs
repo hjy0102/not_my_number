@@ -213,10 +213,30 @@ isNum "-1"
 
 --}
 
+------------------ New Code for NotMyNumber --------------------------------
 
 
 
+playNMN :: IO ()
+playNMN = do
+  putStrLn $ "\nWelcome to NotMyNumber!"
+  putStrLn $ "The objective of the game is not to be the player to find the bomb"
+  putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show minNum) ++ " and " ++ (show maxNum) ++ " to begin"
+  seed <- getRandomGen seed
+  playNewGame seed
+  putStrLn "Game Over"
 
+playNewGame :: StdGen -> IO ()
+playNewGame n = do
+    
+    let (inTargetNumber, newGen) = next n 
+    let bomb = mod inTargetNumber maxNum
+    guessFor bomb 0 
+    showBomb bomb
+    again <- playAgain
+    if again 
+        then playNewGame newGen
+        else quitPlaying
 
 
 
