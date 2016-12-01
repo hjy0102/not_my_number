@@ -5,7 +5,7 @@ module NotMyNumber where
 
 -- to run: 
 -- ghci
--- :load NotMyNumber
+-- :l NotMyNumber
 
 import System.IO 
 -- import Player
@@ -17,6 +17,8 @@ import System.Exit
 import System.Random
 
 -- type Leaderboard = 	(PlayerScore, PlayerScore)		-- Player1 score, Player2 score
+
+minNum = 1
 maxNum = 100 
 
 start :: IO ()
@@ -34,20 +36,17 @@ getRandomGen seed = mkStdGen seed
 -- if there's a seed, use that
 -- otherwise, getRandomSeed
 -- seeds are strings ["123493"] that look like that
-
 {-- 
 $ is infix "application". It's defined as
-
 ($) :: (a -> b) -> (a -> b)
 f $ x = f x
-
 -- or 
 ($) f x = f x
 -- or
 ($) = id
-
 From [stackoverflow]
 --}
+
 getSeed :: [String] -> IO Int
 getSeed [] = getRandomSeed       -- helper function to generate a seed 
 getSeed (s:_) = return $ read s
@@ -65,7 +64,7 @@ playNewGame :: StdGen -> IO ()
 playNewGame n = do
     putStrLn $ "\nWelcome to NotMyNumber!"
     putStrLn $ "The objective of the game is not to be the player to find the bomb"
-    putStrLn $ "The bomb is hidden in the field. Guess a number between 0 and " ++ (show (maxNum - 1)) ++ " to begin"
+    putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show minNum) ++ " and " ++ (show maxNum) ++ " to begin"
     let (inTargetNumber, newGen) = next n 
     let bomb = mod inTargetNumber maxNum
     guessFor bomb 0 
@@ -81,11 +80,15 @@ playNewGame n = do
 guessFor :: Int -> Int -> IO ()
 guessFor bomb count = do
 	putStr "Choose a number? "
-	guess <- getNumber "\n Current guess?"
+	guess <- getNumber "\nCurrent guess? "
 	if bomb == guess
 		then foundBomb $ count + 1
 		else missedBomb bomb count guess 
 
+-- keeps asking for a number 
+getNumber :: String -> IO Int 
+getNumber promptAgain = 
+  getFromStdin promptAgain getLine isNum read 
 
 -- foundBomb is what happens when you find the bomb
 -- not good :( 
@@ -96,7 +99,7 @@ foundBomb count = do
 
 -- missedBomb lets the players keep guessing
 {-- TODO: handle changing the array of possible moves
-
+!!!
 The too low or too high is temporary for testing only
 --}
 missedBomb bomb attempts guess = do
@@ -109,16 +112,12 @@ missedBomb bomb attempts guess = do
 ----------------------- interaction with player ---------------------------
 ---------------------------------------------------------------------------
 
--- yes and no responses are case sensitive!!!
+-- yes and no responses are not case sensitive!!!
 -- keeps prompting until a valid Y or N is returned from player
 getYesNo :: String -> IO Char
 getYesNo promptAgain = 
   getFromStdin promptAgain getChar (`elem` "yYnN") toUpper
 
--- keeps asking for a number 
-getNumber :: String -> IO Int 
-getNumber promptAgain = 
-	getFromStdin promptAgain getLine isNum read 
 
 getFromStdin :: String -> (IO a) -> (a -> Bool) -> (a -> b) -> IO b
 getFromStdin promptAgain inputFunction checkOK transform_OK = do
@@ -132,16 +131,16 @@ getFromStdin promptAgain inputFunction checkOK transform_OK = do
 
 playAgain :: IO Bool
 playAgain = do
-	putStr "One more round? Let's play again...?"
-	again <- getYesNo "\nPlay again?  Y or N"
+	putStr "One more round? Let's play again...? "
+	again <- getYesNo "\nPlay again?  Y or N:  "
 	return $ again == 'Y'
 
 quitPlaying :: IO ()
 quitPlaying = do 
-  putStrLn "\nNahhhh... bye."
+  putStrLn "\nNahhhhhhhhh... bye."
   exitWith ExitSuccess
 
--- Argument verification (FOR TESTING really... )
+-- Argument verification (FOR TESTING, really... )
 checkArgs :: [String] -> IO ()
 checkArgs args =
   if verifyArgs args
@@ -160,15 +159,21 @@ exitWithBadArgs = do
 -- a random seed.  Nothing else is accepted.
 verifyArgs :: [String] -> Bool
 verifyArgs [] = True
-verifyArgs (x:xs) = null xs && isNum x
+verifyArgs (x:xs) = null xs && isNum x 
 
 -- Verify that input is a number.  This approach was chosen as read raises an
 -- exception if it can't parse its input.  This approach has the benefit
 -- of being short, yet sufficient to allow the use of read on anything verified
 -- with it, without having to deal with exceptions.
+-- also, isNum should check if it's within the lowerB and upperB
 isNum :: String -> Bool
-isnum [] = False 
-isNum (x:xs) = all isDigit xs && (x == '-' || isDigit x)
+isNum [] = False 
+isNum (x:xs) = all isDigit xs && (x == '-' || isDigit x) && isInBounds (x:xs)
+
+-- isInBounds checks that the input is in bounds of the min and max 
+isInBounds :: String -> Bool
+isInBounds s = ((read s :: Int) >= minNum) && ((read s :: Int) <= maxNum)
+
 
 ---------------------------------------------------------------------------
 -- FOR TESTING ONLY
@@ -178,6 +183,39 @@ showSeed seed = putStrLn $ "The random seed is " ++ show seed
 showBomb :: Int -> IO ()
 showBomb answer = putStrLn $ "The bomb was at " ++ show answer
  
+---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------
+-- Tests
+
+{--
+
+isInBounds "1"
+>> True
+isInBounds "100"
+>> True
+isInBounds "101"
+>> False
+isInBounds "-1"
+>> False
+
+isNum "-1"
+>> True
+
+--}
+
+
+
+
 
 
 
