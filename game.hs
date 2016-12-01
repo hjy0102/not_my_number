@@ -15,17 +15,22 @@ type PlayerScore = (Char, Int, Int)      -- name, win, loss
 -- A Player takes in a GameState and a Result and produces a A_Move
 type Player = GameState -> Result -> A_Move
 -- Bomb is where the 'mine' is located 
-type Bomb = IO Int
+{- Change
+   type Bomb = IO Int to type Bomb = Int
+   Thinking the notMyNumber.hs can pass in a random bomb.
+-}
+type Bomb = Int
 -- A_Move is a choice on the board, represented by an Int
 type A_Move = Int                       -- a move for a player to make
+-- Bound is (lowerBound, upperBound). Using tuple for readability.
+type Bound = (A_Move, A_Move)
 
-{- GameState is 
-	(LowerBound,	 UpperBound
--}
-type GameState = (A_Move, A_Move)
+--GameState is ((LowerBound, UpperBound), bomb)
+--type GameState = (A_Move, A_Move)
+type GameState = (Bound, Bomb)
 
 data Decision = Win | Lose
-			deriving (Eq, Show)
+            deriving (Eq, Show)
 
 data Action = Move A_Move GameState       -- do A_Move in GameState
             | Start                       -- returns Starting
@@ -44,9 +49,9 @@ type Game = Action -> Result
 
 -- player2 :: Player
 ----------------- Not My Number Game ------------------
-
-new_Bomb :: Bomb
-new_Bomb = randomRIO (0,100::Int)
+{- Comment out this temporarily to reorganize the design-}
+--new_Bomb :: Bomb
+--new_Bomb = randomRIO (0,100::Int)
 
 notMyNumber :: Game 
 {-- 
@@ -59,14 +64,14 @@ then
 	add aMove to p1 list and switch p1 and p2 (next person's turn)
 --}
 -- Move A_Move GameState
-notMyNumber (Move aMove (lowerB, upperB))
-	| aMove == new_Bomb 				    = EndOfGame Lose 
-	| validMove aMove lowerB upperB		    = adjustBounds aMove lowerB upperB
+notMyNumber (Move aMove ((lowerB, upperB), bomb))
+ | aMove == bomb                         = EndOfGame Lose 
+ | validMove aMove lowerB upperB         = adjustBounds aMove (lowerB, upperB) bomb
 
 validMove aMove lowerB upperB = (aMove > lowerB) && (aMove < upperB)
 
-adjustBounds aMove lowerB upperB
-	| aMove < new_Bomb  	= ContinueGame (lowerB, aMove) 
-	| aMove > new_Bomb  	= ContinueGame (aMove, upperB)
+adjustBounds aMove (lowerB, upperB) bomb
+ | aMove < bomb  = ContinueGame ((aMove, lowerB), bomb)
+ | aMove > bomb  = ContinueGame ((lowerB, aMove), bomb)
 
 
