@@ -23,11 +23,12 @@ maxNum = 100
 
 start :: IO ()
 start = do
-    args <- getArgs
-    checkArgs args
-    seed <- getSeed args
-    playNewGame $ getRandomGen seed
-    putStrLn "Game Over"
+  let range = (minNum, maxNum)
+  args <- getArgs
+  checkArgs args
+  seed <- getSeed args
+  playNewGame range $ getRandomGen seed
+  putStrLn "Game Over"
 
 -- create a random generator with the seed given from args seed 
 getRandomGen :: Int -> StdGen
@@ -60,18 +61,21 @@ getRandomSeed = do
     return $ fst $ System.Random.random $ my_RandomS
 
 -- this is how to start the new Game 
-playNewGame :: StdGen -> IO ()
-playNewGame n = do
+playNewGame :: (Int, Int) -> StdGen -> IO ()
+playNewGame range n = do
     putStrLn $ "\nWelcome to NotMyNumber!"
     putStrLn $ "The objective of the game is not to be the player to find the bomb"
-    putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show minNum) ++ " and " ++ (show maxNum) ++ " to begin"
+    putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show (fst range)) ++ " and " ++ (show (snd range)) ++ " to begin"
     let (inTargetNumber, newGen) = next n 
-    let bomb = mod inTargetNumber maxNum
+    let lowerB = fst range
+    let upperB = snd range
+    let bomb = mod inTargetNumber (snd range)
     guessFor bomb 0 
     showBomb bomb
     again <- playAgain
     if again 
-        then playNewGame newGen
+      -- this is wrong !!! just placing for the program to compile
+        then playNewGame range newGen
         else quitPlaying
 
 -- guessFor handles all the guessing
@@ -79,11 +83,11 @@ playNewGame n = do
 -- guess and one as a counter for the attempts
 guessFor :: Int -> Int -> IO ()
 guessFor bomb count = do
-	putStr "Choose a number? "
-	guess <- getNumber "\nCurrent guess? "
-	if bomb == guess
-		then foundBomb $ count + 1
-		else missedBomb bomb count guess 
+  putStr "Choose a number? "
+  guess <- getNumber "\nCurrent guess? "
+  if bomb == guess
+    then foundBomb $ count + 1
+    else missedBomb bomb count guess 
 
 -- keeps asking for a number 
 getNumber :: String -> IO Int 
@@ -94,8 +98,8 @@ getNumber promptAgain =
 -- not good :( 
 foundBomb :: Int -> IO ()
 foundBomb count = do
-	putStrLn "BOOM!*(#@! You found the bomb."
-	putStrLn $ "You died in " ++ show count ++ " turns."
+  putStrLn "BOOM*&@&!^#&@!*(#@!! You found the bomb."
+  putStrLn $ "You died in " ++ show count ++ " turns."
 
 -- missedBomb lets the players keep guessing
 {-- TODO: handle changing the array of possible moves
@@ -103,10 +107,10 @@ foundBomb count = do
 The too low or too high is temporary for testing only
 --}
 missedBomb bomb attempts guess = do
-	if bomb > guess
-	    then putStrLn "Too Low"
+  if bomb > guess
+      then putStrLn "Too Low"
         else putStrLn "Too high"
-	guessFor bomb $ attempts + 1
+  guessFor bomb $ (attempts + 1)
 
 ---------------------------------------------------------------------------
 ----------------------- interaction with player ---------------------------
@@ -118,22 +122,20 @@ getYesNo :: String -> IO Char
 getYesNo promptAgain = 
   getFromStdin promptAgain getChar (`elem` "yYnN") toUpper
 
-
 getFromStdin :: String -> (IO a) -> (a -> Bool) -> (a -> b) -> IO b
 getFromStdin promptAgain inputFunction checkOK transform_OK = do
-	input <- inputFunction
-	if checkOK input 
-		then return $ transform_OK input 
-		else do 
-			putStr promptAgain
-			getFromStdin promptAgain inputFunction checkOK transform_OK
-
+  input <- inputFunction
+  if checkOK input 
+    then return $ transform_OK input 
+    else do 
+      putStr promptAgain
+      getFromStdin promptAgain inputFunction checkOK transform_OK
 
 playAgain :: IO Bool
 playAgain = do
-	putStr "One more round? Let's play again...? "
-	again <- getYesNo "\nPlay again?  Y or N:  "
-	return $ again == 'Y'
+  putStr "One more round? Let's play again...? "
+  again <- getYesNo "\nPlay again?  Y or N:  "
+  return $ again == 'Y'
 
 quitPlaying :: IO ()
 quitPlaying = do 
@@ -146,7 +148,6 @@ checkArgs args =
   if verifyArgs args
      then putStrLn "Okay! Let's play!"
      else exitWithBadArgs 
-
 
 exitWithBadArgs :: IO ()
 exitWithBadArgs = do 
@@ -175,6 +176,17 @@ isInBounds :: String -> Bool
 isInBounds s = ((read s :: Int) >= minNum) && ((read s :: Int) <= maxNum)
 
 
+
+
+
+
+
+
+
+
+
+
+
 ---------------------------------------------------------------------------
 -- FOR TESTING ONLY
 showSeed :: Int -> IO ()
@@ -184,8 +196,6 @@ showBomb :: Int -> IO ()
 showBomb answer = putStrLn $ "The bomb was at " ++ show answer
  
 ---------------------------------------------------------------------------
-
-
 
 
 
@@ -210,6 +220,10 @@ isInBounds "-1"
 
 isNum "-1"
 >> True
+
+-- should start a game
+playNewGame (1,10) (getRandomGen 20)
+
 
 --}
 
