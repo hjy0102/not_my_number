@@ -23,11 +23,11 @@ maxNum = 100
 
 start :: IO ()
 start = do
-    args <- getArgs
-    checkArgs args
-    seed <- getSeed args
-    playNewGame $ getRandomGen seed
-    putStrLn "Game Over"
+  args <- getArgs
+  checkArgs args
+  seed <- getSeed args
+  playNewGame $ getRandomGen seed
+  putStrLn "Game Over"
 
 -- create a random generator with the seed given from args seed 
 getRandomGen :: Int -> StdGen
@@ -66,6 +66,8 @@ playNewGame n = do
     putStrLn $ "The objective of the game is not to be the player to find the bomb"
     putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show minNum) ++ " and " ++ (show maxNum) ++ " to begin"
     let (inTargetNumber, newGen) = next n 
+    let lowerB = minNum
+    let upperB = maxNum
     let bomb = mod inTargetNumber maxNum
     guessFor bomb 0 
     showBomb bomb
@@ -94,7 +96,7 @@ getNumber promptAgain =
 -- not good :( 
 foundBomb :: Int -> IO ()
 foundBomb count = do
-  putStrLn "BOOM!*(#@! You found the bomb."
+  putStrLn "BOOM*&@&!^#&@!*(#@!! You found the bomb."
   putStrLn $ "You died in " ++ show count ++ " turns."
 
 -- missedBomb lets the players keep guessing
@@ -106,7 +108,7 @@ missedBomb bomb attempts guess = do
   if bomb > guess
       then putStrLn "Too Low"
         else putStrLn "Too high"
-  guessFor bomb $ attempts + 1
+  guessFor bomb $ (attempts + 1)
 
 ---------------------------------------------------------------------------
 ----------------------- interaction with player ---------------------------
@@ -118,7 +120,6 @@ getYesNo :: String -> IO Char
 getYesNo promptAgain = 
   getFromStdin promptAgain getChar (`elem` "yYnN") toUpper
 
-
 getFromStdin :: String -> (IO a) -> (a -> Bool) -> (a -> b) -> IO b
 getFromStdin promptAgain inputFunction checkOK transform_OK = do
   input <- inputFunction
@@ -127,7 +128,6 @@ getFromStdin promptAgain inputFunction checkOK transform_OK = do
     else do 
       putStr promptAgain
       getFromStdin promptAgain inputFunction checkOK transform_OK
-
 
 playAgain :: IO Bool
 playAgain = do
@@ -146,7 +146,6 @@ checkArgs args =
   if verifyArgs args
      then putStrLn "Okay! Let's play!"
      else exitWithBadArgs 
-
 
 exitWithBadArgs :: IO ()
 exitWithBadArgs = do 
@@ -173,6 +172,17 @@ isNum (x:xs) = all isDigit xs && (x == '-' || isDigit x) && isInBounds (x:xs)
 -- isInBounds checks that the input is in bounds of the min and max 
 isInBounds :: String -> Bool
 isInBounds s = ((read s :: Int) >= minNum) && ((read s :: Int) <= maxNum)
+
+
+
+
+
+
+
+
+
+
+
 
 
 ---------------------------------------------------------------------------
