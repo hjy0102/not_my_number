@@ -8,15 +8,16 @@ module NotMyNumber where
 -- :l NotMyNumber
 
 import System.IO 
--- import Player
--- import Game
+import Player
+import Game
 import Data.Char
 import Data.Maybe
 import System.Environment
 import System.Exit
 import System.Random
 
--- type Leaderboard = 	(PlayerScore, PlayerScore)		-- Player1 score, Player2 score
+-- Player1 score, Player2 score
+type Leaderboard = (PlayerScore, PlayerScore)
 
 minNum = 0
 maxNum = 101
@@ -28,7 +29,7 @@ start = do
   checkArgs args range
   seed <- getSeed args
   playNewGame range $ getRandomGen seed
-  putStrLn "Game Over"
+  putStrLn "Game Over. "
 
 -- create a random generator with the seed given from args seed 
 getRandomGen :: Int -> StdGen
@@ -64,8 +65,8 @@ getRandomSeed = do
 playNewGame :: (Int, Int) -> StdGen -> IO ()
 playNewGame range n = do
     putStrLn $ "\nWelcome to NotMyNumber!"
-    putStrLn $ "The objective of the game is not to be the player to find the bomb"
-    putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show (fst range)) ++ " and " ++ (show (snd range)) ++ " to begin"
+    putStrLn $ "\nThe objective of the game is not to be the player to find the bomb. "
+    putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range) - 1 ))  ++ " to begin."
     let (inTargetNumber, newGen) = next n 
     let bomb = mod inTargetNumber ((snd range)+1)
     guessFor bomb 0 range
@@ -81,7 +82,6 @@ playNewGame range n = do
 -- guess and one as a counter for the attempts
 guessFor :: Int -> Int -> (Int, Int) -> IO ()
 guessFor bomb count range = do
-  -- putStr "Choose a number? "
   showRange range
   guess <- getNumber "That's not in the range! Guess again:  " range
   if bomb == guess
@@ -97,7 +97,7 @@ getNumber promptAgain range =
 -- not good :( 
 foundBomb :: Int -> IO ()
 foundBomb count = do
-  putStrLn "BOOM*&@&!^#&@!*(#@!! You found the bomb."
+  putStrLn "    BOOM  *&@&!^#&@!*(#@!!    You found the bomb."
   putStrLn $ "You died in " ++ show count ++ " turns."
 
 -- missedBomb lets the players keep guessing
@@ -113,8 +113,6 @@ missedBomb bomb attempts (lower, upper) guess = do
         else do 
           putStrLn "too high"
           guessFor bomb (attempts + 1) (lower, guess)
-
-
 
 
 ---------------------------------------------------------------------------
@@ -181,17 +179,6 @@ isInBounds :: (Int, Int) -> String -> Bool
 isInBounds range s = ((read s :: Int) > (fst range)) && ((read s :: Int) < (snd range))
 
 
-
-
-
-
-
-
-
-
-
-
-
 ---------------------------------------------------------------------------
 -- FOR TESTING ONLY
 showSeed :: Int -> IO ()
@@ -200,15 +187,9 @@ showSeed seed = putStrLn $ "The random seed is " ++ show seed
 showBomb :: Int -> IO ()
 showBomb answer = putStrLn $ "The bomb was at " ++ show answer
 
-
 showRange :: (Int, Int) -> IO ()
 showRange range = putStrLn $ "Choose a value between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range)-1))
 ---------------------------------------------------------------------------
-
-
-
-
-
 
 
 
