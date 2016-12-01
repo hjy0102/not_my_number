@@ -30,9 +30,6 @@ getPlayerWin (name, win, loss) = win
 getPlayerLoss :: PlayerScore -> Int
 getPlayerLoss (name, win, loss) = loss 
 
--- Tournament State is Player1 score, Player2 score
-type TournammentState = (PlayerScore, PlayerScore)   -- wins, losses
-
 -- GameState is ((LowerBound, UpperBound), bomb)
 type GameState = ((Int, Int), Int)
 setGameState :: (Int, Int) -> Int -> GameState
@@ -133,6 +130,7 @@ foundBomb player count = do
   let win = getPlayerWin player 
   let loss  = getPlayerLoss player
   let new_Player = setPlayerScore name win (loss+1)
+  putStrLn $ show new_Player
   putStrLn "    BOOM  *&@&!^#&@!*(#@!!    You found the bomb."
   putStrLn $ show name ++ " died in " ++ show count ++ " turns."
 
