@@ -83,7 +83,8 @@ playNewGame range n = do
 -- guess and one as a counter for the attempts
 guessFor :: Int -> Int -> (Int, Int) -> IO ()
 guessFor bomb count range = do
-  putStr "Choose a number? "
+  -- putStr "Choose a number? "
+  showRange range
   guess <- getNumber "\nCurrent guess? " range
   if bomb == guess
     then foundBomb $ count + 1
@@ -200,7 +201,10 @@ showSeed seed = putStrLn $ "The random seed is " ++ show seed
 -- FOR TESTING ONLY
 showBomb :: Int -> IO ()
 showBomb answer = putStrLn $ "The bomb was at " ++ show answer
- 
+
+
+showRange :: (Int, Int) -> IO ()
+showRange range = putStrLn $ "Choose a value between " ++ (show (fst range)) ++ " and " ++ (show (snd range))
 ---------------------------------------------------------------------------
 
 
