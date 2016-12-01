@@ -221,6 +221,10 @@ isInBounds "-1"
 isNum "-1"
 >> True
 
+-- should start a game
+playNewGame (1,10) (getRandomGen 20)
+
+
 --}
 
 
