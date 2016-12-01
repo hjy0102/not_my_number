@@ -8,17 +8,53 @@ module NotMyNumber where
 -- :l NotMyNumber
 
 import System.IO 
-import Player
-import Game
+-- import Player
+-- import Game
 import Data.Char
 import Data.Maybe
 import System.Environment
 import System.Exit
 import System.Random
+---------------------------------------------------------------------------
+-- name, win, lose 
+type PlayerScore = (String, Int, Int)
+setPlayerScore :: String -> Int -> Int -> PlayerScore
+setPlayerScore name win lose = (name, win, lose)
 
--- Player1 score, Player2 score
-type Leaderboard = (PlayerScore, PlayerScore)
+-- Tournament State is Player1 score, Player2 score
+type TournammentState = (PlayerScore, PlayerScore)   -- wins, losses
 
+-- GameState is ((LowerBound, UpperBound), bomb)
+type GameState = ((Int, Int), Int)
+setGameState :: (Int, Int) -> Int -> GameState
+setGameState bound bomb = (bound, bomb)
+
+
+--play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
+--play game start opponent tournament_state =
+--  let (wins, losses) = tournament_state in
+--   do
+--      putStrLn ("Tournament results: "++ show wins ++ " wins "++show losses++" losses "++show ties++" ties")
+--      putStrLn "Who starts? 0=you, 1=computer, 2=exit."
+--      line <- getLine
+--      if (read line :: Int)==0
+--      then
+--            person_play game start opponent tournament_state
+--      else if (read line :: Int)==1
+--           then
+--               computer_play game start opponent tournament_state
+--            else
+--               return tournament_state
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------
 minNum = 0
 maxNum = 101
 
@@ -27,8 +63,12 @@ start = do
   let range = (minNum, maxNum)
   args <- getArgs
   checkArgs args range
+  putStrLn "Player name ?  "
+  name <- getLine
+  let player1     = setPlayerScore name 0 0
+  let comp_player = setPlayerScore "Computer" 0 0
   seed <- getSeed args
-  playNewGame range $ getRandomGen seed
+  playNewGame player1 comp_player range $ getRandomGen seed
   putStrLn "Game Over. "
 
 -- create a random generator with the seed given from args seed 
@@ -38,17 +78,6 @@ getRandomGen seed = mkStdGen seed
 -- if there's a seed, use that
 -- otherwise, getRandomSeed
 -- seeds are strings ["123493"] that look like that
-{-- 
-$ is infix "application". It's defined as
-($) :: (a -> b) -> (a -> b)
-f $ x = f x
--- or 
-($) f x = f x
--- or
-($) = id
-From [stackoverflow]
---}
-
 getSeed :: [String] -> IO Int
 getSeed [] = getRandomSeed       -- helper function to generate a seed 
 getSeed (s:_) = return $ read s
@@ -62,20 +91,26 @@ getRandomSeed = do
     return $ fst $ System.Random.random $ my_RandomS
 
 -- this is how to start the new Game 
-playNewGame :: (Int, Int) -> StdGen -> IO ()
-playNewGame range n = do
+playNewGame :: PlayerScore -> PlayerScore -> (Int, Int) -> StdGen -> IO ()
+playNewGame p1 p2 range n = do
     putStrLn $ "\nWelcome to NotMyNumber!"
     putStrLn $ "\nThe objective of the game is not to be the player to find the bomb. "
     putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range) - 1 ))  ++ " to begin."
     let (inTargetNumber, newGen) = next n 
     let bomb = mod inTargetNumber ((snd range)+1)
+    let gameState = setGameState range bomb
+    putStrLn "Who starts? 0=you, 1=computer, 2=exit."
+    starter <- getLine
     guessFor bomb 0 range
     showBomb bomb
     again <- playAgain
     if again 
-      -- this is wrong !!! just placing for the program to compile
-        then playNewGame range newGen
+        then playNewGame p1 p2 range newGen
         else quitPlaying
+
+
+
+
 
 -- guessFor handles all the guessing
 -- takes in two Int arguments: one for the 
