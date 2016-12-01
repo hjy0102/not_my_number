@@ -24,9 +24,21 @@ maxNum = 100
 start :: IO ()
 start = do
   let range = (minNum, maxNum)
+  putStrLn "Which mode? 0=2-players, 1=easy, 2=medium, 3=hard."
   args <- getArgs
-  checkArgs args
-  seed <- getSeed args
+  putStrLn (show args) -- Just for test
+  seed <- getSeed []
+  mode <- checkArgs args
+  if(mode == "0")
+    then 
+  else if (mode == "1")
+    then
+  else if (mode == "2")
+    then
+  else if (mode == "3")
+    then
+  else exitWithBadArgs
+  
   playNewGame range $ getRandomGen seed
   putStrLn "Game Over"
 
@@ -230,30 +242,34 @@ playNewGame (1,10) (getRandomGen 20)
 ------------------ New Code for NotMyNumber --------------------------------
 
 
-
-playNMN :: IO ()
-playNMN = do
-  putStrLn $ "\nWelcome to NotMyNumber!"
-  putStrLn $ "The objective of the game is not to be the player to find the bomb"
-  putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show minNum) ++ " and " ++ (show maxNum) ++ " to begin"
-  seed <- getRandomGen seed
-  playNewGame seed
-  putStrLn "Game Over"
-
-playNewGame :: StdGen -> IO ()
-playNewGame n = do
-    
-    let (inTargetNumber, newGen) = next n 
-    let bomb = mod inTargetNumber maxNum
-    guessFor bomb 0 
-    showBomb bomb
-    again <- playAgain
-    if again 
-        then playNewGame newGen
-        else quitPlaying
+person_play :: Game -> Result -> Player
+-- opponent has played, the person must now play
+person_play game (EndOfGame Lose) opponent =
+   do
+      putStrLn "Computer won!"
+      play game (game Start) opponent (wins,losses+1,ties)
+person_play game (ContinueGame state avail) opponent tournament_state =
+   do
+      putStrLn ("State is "++show state++" choose one of "++show avail)
+      line <- getLine
+      computer_play game (game (Move (read line :: AMove) state)) opponent tournament_state
 
 
-
+computer_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
+-- computer_play game current_result opponent tournament_state
+-- person has played, the computer must now play
+computer_play game (EndOfGame Lose) opponent (wins,losses,ties) =
+   do
+      putStrLn "You won!"
+      play game (game Start) opponent (wins+1,losses,ties)
+      
+computer_play game result opponent tournament_state =
+      let ContinueGame state _ = result
+          opponent_move = opponent game result
+        in
+          do
+            putStrLn ("The computer chose "++show opponent_move)
+            person_play game (game (Move opponent_move state)) opponent tournament_state
 
 
 
