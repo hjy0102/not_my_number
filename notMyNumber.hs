@@ -23,10 +23,11 @@ maxNum = 100
 
 start :: IO ()
 start = do
+  let range = (minNum, maxNum)
   args <- getArgs
   checkArgs args
   seed <- getSeed args
-  playNewGame $ getRandomGen seed
+  playNewGame range $ getRandomGen seed
   putStrLn "Game Over"
 
 -- create a random generator with the seed given from args seed 
@@ -60,20 +61,21 @@ getRandomSeed = do
     return $ fst $ System.Random.random $ my_RandomS
 
 -- this is how to start the new Game 
-playNewGame :: StdGen -> IO ()
-playNewGame n = do
+playNewGame :: (Int, Int) -> StdGen -> IO ()
+playNewGame range n = do
     putStrLn $ "\nWelcome to NotMyNumber!"
     putStrLn $ "The objective of the game is not to be the player to find the bomb"
-    putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show minNum) ++ " and " ++ (show maxNum) ++ " to begin"
+    putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show (fst range)) ++ " and " ++ (show (snd range)) ++ " to begin"
     let (inTargetNumber, newGen) = next n 
-    let lowerB = minNum
-    let upperB = maxNum
-    let bomb = mod inTargetNumber maxNum
+    let lowerB = fst range
+    let upperB = snd range
+    let bomb = mod inTargetNumber (snd range)
     guessFor bomb 0 
     showBomb bomb
     again <- playAgain
     if again 
-        then playNewGame newGen
+      -- this is wrong !!! just placing for the program to compile
+        then playNewGame range newGen
         else quitPlaying
 
 -- guessFor handles all the guessing
@@ -194,8 +196,6 @@ showBomb :: Int -> IO ()
 showBomb answer = putStrLn $ "The bomb was at " ++ show answer
  
 ---------------------------------------------------------------------------
-
-
 
 
 
