@@ -18,8 +18,8 @@ import System.Random
 
 -- type Leaderboard = 	(PlayerScore, PlayerScore)		-- Player1 score, Player2 score
 
-minNum = 1
-maxNum = 100 
+minNum = 0
+maxNum = 101
 
 start :: IO ()
 start = do
@@ -68,9 +68,7 @@ playNewGame range n = do
     putStrLn $ "The objective of the game is not to be the player to find the bomb"
     putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show (fst range)) ++ " and " ++ (show (snd range)) ++ " to begin"
     let (inTargetNumber, newGen) = next n 
-    let lowerB = fst range
-    let upperB = snd range
-    let bomb = mod inTargetNumber (snd range)
+    let bomb = mod inTargetNumber ((snd range)+1)
     guessFor bomb 0 range
     showBomb bomb
     again <- playAgain
@@ -86,7 +84,7 @@ guessFor :: Int -> Int -> (Int, Int) -> IO ()
 guessFor bomb count range = do
   -- putStr "Choose a number? "
   showRange range
-  guess <- getNumber "\nCurrent guess? " range
+  guess <- getNumber "That's not in the range! Guess again:  " range
   if bomb == guess
     then foundBomb $ count + 1
     else missedBomb bomb count range guess 
@@ -205,7 +203,7 @@ showBomb answer = putStrLn $ "The bomb was at " ++ show answer
 
 
 showRange :: (Int, Int) -> IO ()
-showRange range = putStrLn $ "Choose a value between " ++ (show (fst range)) ++ " and " ++ (show (snd range))
+showRange range = putStrLn $ "Choose a value between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range)-1))
 ---------------------------------------------------------------------------
 
 
