@@ -8,8 +8,8 @@ module NotMyNumber where
 -- :l NotMyNumber
 
 import System.IO 
--- import Player
--- import Game
+import Player
+import Game
 import Data.Char
 import Data.Maybe
 import System.Environment
@@ -180,17 +180,15 @@ foundBomb player count = do
   let name = getPlayerName player
   let win = getPlayerWin player 
   let loss  = getPlayerLoss player
-  let new_Player = setPlayerScore name win (loss+1)
-  putStrLn $ show new_Player
+  -- let new_Player = setPlayerScore name win (loss+1)
+  -- putStrLn $ show new_Player
   putStrLn "    BOOM  *&@&!^#&@!*(#@!!    You found the bomb."
   putStrLn $ show name ++ " died in " ++ show count ++ " turns."
 
 -- missedBomb lets the players keep guessing
-{-- TODO: handle changing the array of possible moves
-!!!
+{-- 
 The too low or too high is temporary for testing only
 missedBomb p1 p2 bomb count range guess 
-
 -- guessFor takes in:
 -- player1 player2 
 -- bomb location
@@ -288,86 +286,4 @@ showBomb answer = putStrLn $ "The bomb was at " ++ show answer
 
 showRange :: (Int, Int) -> IO ()
 showRange range = putStrLn $ "Choose a value between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range)-1))
-
------------------- New Code for NotMyNumber --------------------------------
-
-
-
-
-
---start1 :: IO ()
---start1 = do
---  let range = (minNum, maxNum)
---  putStrLn $ "\nWelcome to NotMyNumber!"
---  putStrLn $ "The objective of the game is not to be the player to find the bomb"
---  putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show (fst range)) ++ " and " ++ (show (snd range)) ++ " to begin"
---  playNewGame1 notMyNumber (notMyNumber Start) (0,0)
---  else exitWithBadArgs
---  putStrLn "Game Over"
-
---playNewGame1 :: Game -> PlayerRecord -> Bool -> IO PlayerRecord
---playNewGame1 game record isQuit= 
---  let (inTargetNumber, newGen) = next (getRandomGen seed)
---      bomb = mod inTargetNumber (snd range)
---  in
---    do
---      putStrLn "Which mode? 0=2-players, 1=easy, 2=medium, 3=hard."
---      mode <- getLine
---      putStrLn "Who starts? 0=you, 1=computer"
---      order <- getLine
---      putStrLn ("mode is"++show mode) -- Just for test
---      putStrLn ("order is"++show order)  -- Just for test
---      seed <- getSeed []
---      {- TODO make more if else -}
---      if((read mode :: Int)==0)
---        then putStrLn "Have not implemented this"
---      else if ((read mode :: Int)==1)
---        then person_play game (notMyNumber Start ((range),bomb)) easy_player record
---      else if ((read mode :: Int)==2)
---        then playNewGame1 game (notMyNumber Start ((range),bomb)) medium_player record
---      else if ((read mode :: Int)==3)
---        then playNewGame1 game (notMyNumber Start ((range),bomb)) hard_player record
---      else 
-
---person_play :: Game -> Result -> Player -> PlayerRecord -> IO PlayerRecord
----- opponent has played, the person must now play
---person_play game (EndOfGame Lose) opponent (wins,losses) =
---   do
---      putStrLn "Computer won!"
---      again <- playAgain
---      if again 
---      -- this is wrong !!! just placing for the program to compile
---        then playNewGame1 game (wins,losses+1)
---        else quitPlaying
-      
---person_play game (ContinueGame (bound, bomb)) opponent record =
---   do
---      {- TODO get User input as AMove -}
---      -- move <-
---      computer_play game (game (Move move (bound, bomb)) opponent record
-
-
---computer_play :: Game -> Result -> Player -> PlayerRecord -> IO PlayerRecord
----- computer_play game current_result opponent tournament_state
----- person has played, the computer must now play
---computer_play game (EndOfGame Lose) opponent (wins,losses) =
---   do
---      putStrLn "You won!"
---      again <- playAgain
---      if again 
---      -- this is wrong !!! just placing for the program to compile
---        then playNewGame1 game (wins,losses+1)
---        else quitPlaying
-      
---computer_play game result opponent (wins,losses) =
---      let ContinueGame state = result
---          opponent_move = opponent game result
---        in
---          do
---            putStrLn ("The computer chose "++show opponent_move)
---            person_play game (game (Move opponent_move state) (bound, bomb)) opponent (wins,losses)
-
-
-
-
 
