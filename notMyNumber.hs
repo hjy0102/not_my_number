@@ -150,14 +150,12 @@ getNumber promptAgain range =
 -- return a new PlayerScore tuple
 foundBomb :: PlayerScore -> PlayerScore -> Int -> Int -> IO (PlayerScore, PlayerScore)
 foundBomb p1 p2 count1 count2 = do
-  let name = getPlayerName p1
-  let win = getPlayerWin p1 
-  let loss  = getPlayerLoss p1
-  let new_Player = setPlayerScore name win (loss+1)
-  putStrLn $ show new_Player
+  let loser = setPlayerScore (getPlayerName p1) (getPlayerWin p1) ((getPlayerLoss p1) + 1)
+  let winner = setPlayerScore (getPlayerName p2) (1 + (getPlayerWin p2)) (getPlayerLoss p2)
+  -- putStrLn $ show new_Player
   putStrLn "BOOM  *&@&!^#&@!*(#@!!    You found the bomb."
-  putStrLn $ show name ++ " died in " ++ show count1 ++ " turns."
-  return (new_Player, p2)
+  putStrLn $ show (getPlayerName p1) ++ " died in " ++ show count1 ++ " turns."
+  return (loser, winner)
 
 -- missedBomb lets the players keep guessing
 {-- 
