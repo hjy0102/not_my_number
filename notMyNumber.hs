@@ -34,7 +34,7 @@ getPlayerLoss (name, win, loss) = loss
 type GameState = ((Int, Int), Int)
 setGameState :: (Int, Int) -> Int -> GameState
 setGameState bound bomb = (bound, bomb)
-
+-- Computer is a auto-player who take in a Bound (Int, Int) and return a move (Int)
 type Computer = (Int, Int) -> Int
 computer_easy :: Computer
 computer_easy (lowerB, upperB) 
@@ -108,22 +108,24 @@ playNewGame p1 p2 range n = do
     let (inTargetNumber, newGen) = next n 
     let bomb = mod inTargetNumber ((snd range)+1)
     let gameState = setGameState range bomb
-    
     putStrLn $ "Who starts? 0 = " ++ (show (getPlayerName p1)) ++ ", 1 = " ++ (show (getPlayerName p2)) ++ ", 2 = exit."
     starter <- getLine
-    setFirstPlayer starter p1 p2 bomb range
-    showBomb bomb 
-    putStrLn $ "\nThe Score: " ++ show (getPlayerName p1) ++ " has " ++ show (getPlayerWin p1) ++ " wins and " ++ show (getPlayerLoss p1) ++ " losses."
-    putStrLn $ "\nThe Score: " ++ show (getPlayerName p2) ++ " has " ++ show (getPlayerWin p2) ++ " wins and " ++ show (getPlayerLoss p2) ++ " losses."
-    again <- playAgain
-    if again 
-        then playNewGame p1 p2 range newGen
-        else quitPlaying
+    if ((read starter:: Int) == 2)
+      then do quitPlaying
+    else do
+      (newP1, newP2) <- setFirstPlayer starter p1 p2 bomb range
+      showBomb bomb
+      putStrLn $ "\nThe Score: " ++ show (getPlayerName newP1) ++ " has " ++ show (getPlayerWin newP1) ++ " wins and " ++ show (getPlayerLoss newP1) ++ " losses."
+      putStrLn $ "The Score: " ++ show (getPlayerName newP2) ++ " has " ++ show (getPlayerWin newP2) ++ " wins and " ++ show (getPlayerLoss newP2) ++ " losses."
+      again <- playAgain
+      if again 
+          then playNewGame newP1 newP2 range newGen
+          else quitPlaying
 
+setFirstPlayer :: String -> PlayerScore -> PlayerScore -> Int -> (Int,Int) -> IO (PlayerScore, PlayerScore) 
 setFirstPlayer line p1 p2 bomb range
   | ((read line:: Int) == 0)   = guessFor p1 p2 bomb 0 0 range
   | ((read line:: Int) == 1)   = guessFor p2 p1 bomb 0 0 range
-  | ((read line:: Int) == 2)   = quitPlaying
 
 
 -- guessFor handles all the guessing
@@ -132,7 +134,7 @@ setFirstPlayer line p1 p2 bomb range
 -- attempts of player1, attempts of player2
 -- acceptable range
 
-guessFor :: PlayerScore -> PlayerScore -> Int -> Int -> Int -> (Int, Int) -> IO ()
+guessFor :: PlayerScore -> PlayerScore -> Int -> Int -> Int -> (Int, Int) -> IO (PlayerScore, PlayerScore)
 guessFor p1 p2 bomb count_p1 count_p2 range = do
   whoseTurn p1
   showRange range
@@ -141,26 +143,26 @@ guessFor p1 p2 bomb count_p1 count_p2 range = do
           let guess = computer_easy range
           putStrLn ((getPlayerName p1)++" chooses "++ show guess)
           if bomb == guess
-            then foundBomb p1 $ count_p1 + 1
+            then do foundBomb p1 p2 (count_p1 + 1) count_p2
             else missedBomb p1 p2 bomb count_p1 count_p2 range guess 
   else if (getPlayerName p1 == "computer_medium")
     then  do
           let guess = computer_medium range
           putStrLn ((getPlayerName p1)++" chooses "++ show guess)
           if bomb == guess
-            then foundBomb p1 $ count_p1 + 1
+            then do foundBomb p1 p2 (count_p1 + 1) count_p2
             else missedBomb p1 p2 bomb count_p1 count_p2 range guess
   else if (getPlayerName p1 == "computer_hard")
     then  do
           let guess = computer_hard range
           putStrLn ((getPlayerName p1)++" chooses "++ show guess)
           if bomb == guess
-            then foundBomb p1 $ count_p1 + 1
+            then do foundBomb p1 p2 (count_p1 + 1) count_p2
             else missedBomb p1 p2 bomb count_p1 count_p2 range guess
   else do
     guess <- getNumber "That's not in the range! Guess again:  " range
     if bomb == guess
-      then foundBomb p1 $ count_p1 + 1
+      then do foundBomb p1 p2 (count_p1 + 1) count_p2
       else missedBomb p1 p2 bomb count_p1 count_p2 range guess 
 
 whoseTurn :: PlayerScore -> IO ()
@@ -173,16 +175,16 @@ getNumber promptAgain range =
 
 -- foundBomb is what happens when you find the bomb
 -- not good :( 
-foundBomb :: PlayerScore -> Int -> IO ()
-foundBomb player count = do
-  let name = getPlayerName player
-  let win = getPlayerWin player 
-  let loss  = getPlayerLoss player
+foundBomb :: PlayerScore -> PlayerScore -> Int -> Int -> IO (PlayerScore, PlayerScore)
+foundBomb p1 p2 count1 count2 = do
+  let name = getPlayerName p1
+  let win = getPlayerWin p1 
+  let loss  = getPlayerLoss p1
   let new_Player = setPlayerScore name win (loss+1)
   putStrLn $ show new_Player
-  putStrLn "    BOOM  *&@&!^#&@!*(#@!!    You found the bomb."
-  putStrLn $ show name ++ " died in " ++ show count ++ " turns."
-
+  putStrLn "BOOM  *&@&!^#&@!*(#@!!    You found the bomb."
+  putStrLn $ show name ++ " died in " ++ show count1 ++ " turns."
+  return (new_Player, p2)
 -- missedBomb lets the players keep guessing
 {-- TODO: handle changing the array of possible moves
 !!!
