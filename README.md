@@ -20,15 +20,17 @@ The interval always contains the value b and the chances of Player1 or Player2 c
 * different modes for different levels of difficulty
 
 # To run
-Make sure ghci is downloaded and also install random package by, 
 
-In terminal:
-```
-cabal install random
-```
 ### To play the game: 
 ```
 ghci
 :l NotMyNumber
 start
+```
+
+### Troubleshoot
+Make sure ghci is downloaded and also install random package by, 
+In terminal:
+```
+cabal install random
 ```
