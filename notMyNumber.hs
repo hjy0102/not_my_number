@@ -35,6 +35,16 @@ type GameState = ((Int, Int), Int)
 setGameState :: (Int, Int) -> Int -> GameState
 setGameState bound bomb = (bound, bomb)
 
+type Computer = (Int, Int) -> Int
+computer_easy :: Computer
+computer_easy (lowerB, upperB) 
+ | (lowerB + 5)<upperB = (lowerB + 5)
+ | otherwise = upperB
+computer_medium :: Computer
+computer_medium (lowerB, upperB) = ((lowerB+upperB)*2) `div` 3
+computer_hard :: Computer
+computer_hard (lowerB, upperB) = (lowerB+upperB+1) `div` 2
+
 ---------------------------------------------------------------------------
 minNum = 0
 maxNum = 101
@@ -42,18 +52,35 @@ maxNum = 101
 start :: IO ()
 start = do
   let range = (minNum, maxNum)
-  args <- getArgs
-  checkArgs args range
-  putStrLn "Player1's name ?  "
-  name <- getLine
-  let player1     = setPlayerScore name 0 0
-  putStrLn "Player2's name ?  "
-  name2 <- getLine
-  let comp_player = setPlayerScore name2 0 0
-  let tournament_state = (player1, comp_player)
-  seed <- getSeed args
-  playNewGame player1 comp_player range $ getRandomGen seed
-  putStrLn "Game Over. "
+  seed <- getSeed []
+  putStrLn $ "\nWelcome to NotMyNumber!"
+  putStrLn $ "\nThe objective of the game is not to be the player to find the bomb. "
+  putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range) - 1 ))  ++ " to begin."
+  putStrLn "\nWhich mode? 0=2-players, 1=easy, 2=medium, 3=hard."
+  mode <- getLine
+  if ((read mode:: Int) == 0)
+    then  do
+          --args <- getArgs
+          --checkArgs args range
+          putStrLn "Player1's name ?  "
+          name <- getLine
+          let player1     = setPlayerScore name 0 0
+          putStrLn "Player2's name ?  "
+          name2 <- getLine
+          let player2 = setPlayerScore name2 0 0
+          let tournament_state = (player1, player2)
+          --seed <- getSeed args
+          playNewGame player1 player2 range $ getRandomGen seed
+          putStrLn "Game Over. "
+  else do
+    let modeName = checkMode (read mode:: Int)
+    putStrLn "Player's name ?  "
+    name <- getLine
+    let player     = setPlayerScore name 0 0
+    let computer_player = setPlayerScore ("computer_"++modeName) 0 0
+    let tournament_state = (player, computer_player)
+    playNewGame player computer_player range $ getRandomGen seed
+    putStrLn "Game Over. "
 
 -- create a random generator with the seed given from args seed 
 getRandomGen :: Int -> StdGen
@@ -77,9 +104,7 @@ getRandomSeed = do
 -- this is how to start the new Game 
 playNewGame :: PlayerScore -> PlayerScore -> (Int, Int) -> StdGen -> IO ()
 playNewGame p1 p2 range n = do
-    putStrLn $ "\nWelcome to NotMyNumber!"
-    putStrLn $ "\nThe objective of the game is not to be the player to find the bomb. "
-    putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range) - 1 ))  ++ " to begin."
+    putStrLn "Okay! Let's play!"
     let (inTargetNumber, newGen) = next n 
     let bomb = mod inTargetNumber ((snd range)+1)
     let gameState = setGameState range bomb
@@ -113,13 +138,35 @@ guessFor :: PlayerScore -> PlayerScore -> Int -> Int -> Int -> (Int, Int) -> IO 
 guessFor p1 p2 bomb count_p1 count_p2 range = do
   whoseTurn p1
   showRange range
-  guess <- getNumber "That's not in the range! Guess again:  " range
-  if bomb == guess
-    then foundBomb p1 $ count_p1 + 1
-    else missedBomb p1 p2 bomb count_p1 count_p2 range guess 
+  if (getPlayerName p1 == "computer_easy")
+    then  do 
+          let guess = computer_easy range
+          putStrLn ((getPlayerName p1)++" chooses "++ show guess)
+          if bomb == guess
+            then foundBomb p1 $ count_p1 + 1
+            else missedBomb p1 p2 bomb count_p1 count_p2 range guess 
+  else if (getPlayerName p1 == "computer_medium")
+    then  do
+          let guess = computer_medium range
+          putStrLn ((getPlayerName p1)++" chooses "++ show guess)
+          if bomb == guess
+            then foundBomb p1 $ count_p1 + 1
+            else missedBomb p1 p2 bomb count_p1 count_p2 range guess
+  else if (getPlayerName p1 == "computer_hard")
+    then  do
+          let guess = computer_hard range
+          putStrLn ((getPlayerName p1)++" chooses "++ show guess)
+          if bomb == guess
+            then foundBomb p1 $ count_p1 + 1
+            else missedBomb p1 p2 bomb count_p1 count_p2 range guess
+  else do
+    guess <- getNumber "That's not in the range! Guess again:  " range
+    if bomb == guess
+      then foundBomb p1 $ count_p1 + 1
+      else missedBomb p1 p2 bomb count_p1 count_p2 range guess 
 
 whoseTurn :: PlayerScore -> IO ()
-whoseTurn p1 = putStrLn $ "Whose turn: " ++ show (getPlayerName p1)
+whoseTurn p1 = putStrLn $ "\nWhose turn: " ++ show (getPlayerName p1)
 
 -- keeps asking for a number 
 getNumber :: String -> (Int, Int) -> IO Int 
@@ -224,7 +271,13 @@ isNum range (x:xs) = all isDigit xs && (x == '-' || isDigit x) && isInBounds ran
 isInBounds :: (Int, Int) -> String -> Bool
 isInBounds range s = ((read s :: Int) > (fst range)) && ((read s :: Int) < (snd range))
 
-
+-- check which mode does the user choose and return corresponding computer name (e.g., computer_easy)
+checkMode :: Int -> String
+checkMode mode
+ | mode == 1 = "easy"
+ | mode == 2 = "medium"
+ | mode == 3 = "hard"
+ | otherwise = "strange"
 ---------------------------------------------------------------------------
 -- FOR TESTING ONLY
 showSeed :: Int -> IO ()
@@ -236,20 +289,83 @@ showBomb answer = putStrLn $ "The bomb was at " ++ show answer
 showRange :: (Int, Int) -> IO ()
 showRange range = putStrLn $ "Choose a value between " ++ (show ((fst range) + 1)) ++ " and " ++ (show ((snd range)-1))
 
+------------------ New Code for NotMyNumber --------------------------------
 
 
 
 
 
+--start1 :: IO ()
+--start1 = do
+--  let range = (minNum, maxNum)
+--  putStrLn $ "\nWelcome to NotMyNumber!"
+--  putStrLn $ "The objective of the game is not to be the player to find the bomb"
+--  putStrLn $ "The bomb is hidden in the field. Guess a number between " ++ (show (fst range)) ++ " and " ++ (show (snd range)) ++ " to begin"
+--  playNewGame1 notMyNumber (notMyNumber Start) (0,0)
+--  else exitWithBadArgs
+--  putStrLn "Game Over"
+
+--playNewGame1 :: Game -> PlayerRecord -> Bool -> IO PlayerRecord
+--playNewGame1 game record isQuit= 
+--  let (inTargetNumber, newGen) = next (getRandomGen seed)
+--      bomb = mod inTargetNumber (snd range)
+--  in
+--    do
+--      putStrLn "Which mode? 0=2-players, 1=easy, 2=medium, 3=hard."
+--      mode <- getLine
+--      putStrLn "Who starts? 0=you, 1=computer"
+--      order <- getLine
+--      putStrLn ("mode is"++show mode) -- Just for test
+--      putStrLn ("order is"++show order)  -- Just for test
+--      seed <- getSeed []
+--      {- TODO make more if else -}
+--      if((read mode :: Int)==0)
+--        then putStrLn "Have not implemented this"
+--      else if ((read mode :: Int)==1)
+--        then person_play game (notMyNumber Start ((range),bomb)) easy_player record
+--      else if ((read mode :: Int)==2)
+--        then playNewGame1 game (notMyNumber Start ((range),bomb)) medium_player record
+--      else if ((read mode :: Int)==3)
+--        then playNewGame1 game (notMyNumber Start ((range),bomb)) hard_player record
+--      else 
+
+--person_play :: Game -> Result -> Player -> PlayerRecord -> IO PlayerRecord
+---- opponent has played, the person must now play
+--person_play game (EndOfGame Lose) opponent (wins,losses) =
+--   do
+--      putStrLn "Computer won!"
+--      again <- playAgain
+--      if again 
+--      -- this is wrong !!! just placing for the program to compile
+--        then playNewGame1 game (wins,losses+1)
+--        else quitPlaying
+      
+--person_play game (ContinueGame (bound, bomb)) opponent record =
+--   do
+--      {- TODO get User input as AMove -}
+--      -- move <-
+--      computer_play game (game (Move move (bound, bomb)) opponent record
 
 
-
-
-
-
-
-
-
+--computer_play :: Game -> Result -> Player -> PlayerRecord -> IO PlayerRecord
+---- computer_play game current_result opponent tournament_state
+---- person has played, the computer must now play
+--computer_play game (EndOfGame Lose) opponent (wins,losses) =
+--   do
+--      putStrLn "You won!"
+--      again <- playAgain
+--      if again 
+--      -- this is wrong !!! just placing for the program to compile
+--        then playNewGame1 game (wins,losses+1)
+--        else quitPlaying
+      
+--computer_play game result opponent (wins,losses) =
+--      let ContinueGame state = result
+--          opponent_move = opponent game result
+--        in
+--          do
+--            putStrLn ("The computer chose "++show opponent_move)
+--            person_play game (game (Move opponent_move state) (bound, bomb)) opponent (wins,losses)
 
 
 
