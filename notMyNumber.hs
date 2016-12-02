@@ -85,8 +85,10 @@ playNewGame p1 p2 range n = do
     let gameState = setGameState range bomb
     
     putStrLn $ "Who starts? 0 = " ++ (show (getPlayerName p1)) ++ ", 1 = " ++ (show (getPlayerName p2)) ++ ", 2 = exit."
+    
     starter <- getLine
     setFirstPlayer starter p1 p2 bomb range
+
     showBomb bomb 
     putStrLn $ "\nThe Score: " ++ show (getPlayerName p1) ++ " has " ++ show (getPlayerWin p1) ++ " wins and " ++ show (getPlayerLoss p1) ++ " losses."
     putStrLn $ "\nThe Score: " ++ show (getPlayerName p2) ++ " has " ++ show (getPlayerWin p2) ++ " wins and " ++ show (getPlayerLoss p2) ++ " losses."
