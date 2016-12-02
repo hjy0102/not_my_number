@@ -153,7 +153,7 @@ foundBomb p1 p2 count1 count2 = do
   let loser = setPlayerScore (getPlayerName p1) (getPlayerWin p1) ((getPlayerLoss p1) + 1)
   let winner = setPlayerScore (getPlayerName p2) (1 + (getPlayerWin p2)) (getPlayerLoss p2)
   -- putStrLn $ show new_Player
-  putStrLn "BOOM  *&@&!^#&@!*(#@!!    You found the bomb."
+  putStrLn "\nBOOM  *&@&!^#&@!*(#@!!    You found the bomb."
   putStrLn $ show (getPlayerName p1) ++ " died in " ++ show count1 ++ " turns."
   return (loser, winner)
 
@@ -199,7 +199,7 @@ getFromStdin promptAgain inputFunction checkOK transform_OK = do
 
 playAgain :: IO Bool
 playAgain = do
-  putStr "One more round? Let's play again...? "
+  putStr "\nOne more round? Let's play again...? "
   again <- getYesNo "\nPlay again?  Y or N:  "
   return $ again == 'Y'
 
