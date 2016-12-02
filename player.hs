@@ -27,7 +27,7 @@ getPlayerWin (name, win, loss) = win
 
 getPlayerLoss :: PlayerScore -> Int
 getPlayerLoss (name, win, loss) = loss 
-
+-- Computer is a auto-player who take in a Bound (Int, Int) and return a move (Int)
 type Computer = (Int, Int) -> Int
 computer_easy :: Computer
 computer_easy (lowerB, upperB) 
